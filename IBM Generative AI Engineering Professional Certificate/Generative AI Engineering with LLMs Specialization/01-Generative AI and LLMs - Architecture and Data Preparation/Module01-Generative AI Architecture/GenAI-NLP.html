@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative AI for NLP - Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1A535C;
+            --secondary: #4ECDC4;
+            --accent: #FF6B6B;
+            --dark: #0B2027;
+            --light: #F7FFF7;
+            --gray: #B8B8B8;
+            --bg-pattern: #F0F8F8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-pattern);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(26, 83, 92, 0.05) 0%, transparent 50%);
+            animation: drift 30s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: var(--light);
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: '◆';
+            position: absolute;
+            font-size: 15rem;
+            color: rgba(78, 205, 196, 0.1);
+            top: -3rem;
+            right: -2rem;
+            transform: rotate(15deg);
+        }
+
+        h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease-out 0.4s both;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: var(--light);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .nav-btn:hover::before {
+            left: 0;
+        }
+
+        .nav-btn:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 83, 92, 0.3);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--secondary);
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        .content-card h2 {
+            color: var(--primary);
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h2::before {
+            content: '▸';
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .content-card h3 {
+            color: var(--primary);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.4rem;
+        }
+
+        .content-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .content-card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .content-card li::before {
+            content: '◆';
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Flashcards */
+        .flashcard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .flashcard {
+            height: 250px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            font-weight: 600;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .flashcard-back {
+            background: white;
+            color: var(--dark);
+            transform: rotateY(180deg);
+            border: 3px solid var(--secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Quiz */
+        .quiz-question {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            display: none;
+        }
+
+        .quiz-question.active {
+            display: block;
+            animation: slideInRight 0.4s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .question-number {
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: inline-block;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            color: var(--dark);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option {
+            background: var(--light);
+            border: 2px solid var(--gray);
+            padding: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .option:hover {
+            border-color: var(--secondary);
+            background: rgba(78, 205, 196, 0.1);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(26, 83, 92, 0.1);
+        }
+
+        .option.correct {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option.incorrect {
+            border-color: var(--accent);
+            background: rgba(255, 107, 107, 0.1);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            display: none;
+        }
+
+        .quiz-results.show {
+            display: block;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .score {
+            font-size: 4rem;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        footer {
+            background: var(--dark);
+            color: var(--light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .flashcard-container {
+                grid-template-columns: 1fr;
+            }
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>GENERATIVE AI FOR NLP</h1>
+        <p class="subtitle">Interactive Learning Experience</p>
+    </header>
+
+    <nav>
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showSection('overview')">📚 Overview</button>
+            <button class="nav-btn" onclick="showSection('flashcards')">🃏 Flashcards</button>
+            <button class="nav-btn" onclick="showSection('quiz')">🎯 Quiz</button>
+            <button class="nav-btn" onclick="showSection('summary')">📝 Summary</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <div id="overview" class="section active">
+            <div class="content-card">
+                <h2>What is Generative AI for NLP?</h2>
+                <p>Generative AI architectures enable machines to comprehend human language and generate responses that are indistinguishable from what humans generate. These systems go beyond simple text processing to understand context, sentiment, and intent.</p>
+                
+                <h3>Core Capabilities</h3>
+                <ul>
+                    <li><strong>Language Comprehension:</strong> Deep understanding of human language structures</li>
+                    <li><strong>Response Generation:</strong> Creating human-like text responses</li>
+                    <li><strong>Context Awareness:</strong> Understanding and maintaining conversation context</li>
+                    <li><strong>Sentiment Analysis:</strong> Detecting emotions and intentions behind words</li>
+                    <li><strong>Predictive Analytics:</strong> Advanced modeling for meaningful interactions</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2>Evolution Timeline <span class="badge">4 Stages</span></h2>
+                
+                <h3>1. Rule-Based Systems</h3>
+                <p>Strict adherence to predefined linguistic rules like grammar. Precise but inflexible.</p>
+                
+                <h3>2. Machine Learning Approaches</h3>
+                <p>Statistical methods learning from vast datasets. More adaptable but limited in understanding nuances.</p>
+                
+                <h3>3. Deep Learning</h3>
+                <p>Artificial neural networks with extensive training data. Significant improvement in nuanced interpretations.</p>
+                
+                <h3>4. Transformers (Current State)</h3>
+                <p>Designed for sequential data with superior context understanding and dependency handling.</p>
+            </div>
+
+            <div class="content-card">
+                <h2>Key Applications</h2>
+                <ul>
+                    <li><strong>Machine Translation:</strong> Accurate, context-aware language conversion</li>
+                    <li><strong>Chatbots & Virtual Assistants:</strong> Natural, empathetic conversations</li>
+                    <li><strong>Sentiment Analysis:</strong> Understanding subtle emotional expressions</li>
+                    <li><strong>Text Summarization:</strong> Precise extraction of core meanings</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2>Large Language Models (LLMs)</h2>
+                <p>Foundation models using AI and deep learning with vast datasets to generate text, translate languages, and create diverse content.</p>
+                
+                <h3>Why "Large"?</h3>
+                <ul>
+                    <li><strong>Training Data:</strong> Petabytes of information from websites, books, and documents</li>
+                    <li><strong>Parameters:</strong> Billions of variables defining model behavior</li>
+                </ul>
+                
+                <h3>Major Examples</h3>
+                <ul>
+                    <li><strong>GPT (Generative Pretrained Transformer):</strong> Decoder-based, excels at text generation</li>
+                    <li><strong>BERT (Bidirectional Encoder Representations from Transformers):</strong> Encoder-based, exceptional at understanding context</li>
+                    <li><strong>BART & T5:</strong> Encoder-decoder architecture, versatile for various NLP tasks</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Flashcards Section -->
+        <div id="flashcards" class="section">
+            <div class="content-card">
+                <h2>Study Flashcards <span class="badge">Click to flip</span></h2>
+                <div class="flashcard-container" id="flashcardContainer"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz" class="section">
+            <div class="content-card">
+                <h2>Test Your Knowledge</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="quizContainer"></div>
+            
+            <div class="quiz-results" id="quizResults">
+                <h2>Quiz Complete!</h2>
+                <div class="score" id="finalScore"></div>
+                <p id="scoreMessage"></p>
+                <button class="btn" onclick="resetQuiz()">Try Again</button>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div id="summary" class="section">
+            <div class="content-card">
+                <h2>Key Takeaways</h2>
+                <ul>
+                    <li><strong>Evolution:</strong> Rule-based → Machine Learning → Deep Learning → Transformers</li>
+                    <li><strong>Core Capability:</strong> Machines can comprehend and generate human-like language</li>
+                    <li><strong>Applications:</strong> Machine translation, chatbots, sentiment analysis, text summarization</li>
+                    <li><strong>LLMs:</strong> Use petabytes of data and billions of parameters</li>
+                    <li><strong>Examples:</strong> GPT, BERT, BART, T5 with different architectures</li>
+                    <li><strong>Transfer Learning:</strong> Pretrain on generic data, fine-tune for specific tasks</li>
+                    <li><strong>Responsible AI:</strong> Consider accuracy, bias, and societal impact</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2>GPT vs ChatGPT</h2>
+                <p><strong>Primary Focus:</strong></p>
+                <ul>
+                    <li>GPT: Diverse text generation tasks</li>
+                    <li>ChatGPT: Conversation generation</li>
+                </ul>
+                
+                <p><strong>Training:</strong></p>
+                <ul>
+                    <li>GPT: Primarily supervised learning</li>
+                    <li>ChatGPT: Supervised learning + Reinforcement Learning from Human Feedback (RLHF)</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2>Important Considerations</h2>
+                <ul>
+                    <li><strong>Accuracy:</strong> Models may generate authoritative but inaccurate information</li>
+                    <li><strong>Bias:</strong> May reflect biases present in training data</li>
+                    <li><strong>Societal Impact:</strong> Consider ethical implications of generated content</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Generative AI Learning Materials | Interactive Study Guide</p>
+    </footer>
+
+    <script>
+        // Flashcard data
+        const flashcards = [
+            {
+                front: "What is Generative AI for NLP?",
+                back: "AI systems that can comprehend human language and generate indistinguishable human-like responses with context awareness."
+            },
+            {
+                front: "What are the four stages of NLP evolution?",
+                back: "1. Rule-based systems\n2. Machine learning approaches\n3. Deep learning\n4. Transformers"
+            },
+            {
+                front: "What does LLM stand for?",
+                back: "Large Language Model - foundation models using AI and deep learning with vast datasets"
+            },
+            {
+                front: "Why are LLMs called 'Large'?",
+                back: "Two reasons: (1) Petabytes of training data (2) Billions of parameters"
+            },
+            {
+                front: "What is GPT best known for?",
+                back: "Text generation with a decoder-only architecture, excellent for chatbots and content creation"
+            },
+            {
+                front: "What is BERT's specialty?",
+                back: "Understanding context within sentences using an encoder-only architecture, ideal for sentiment analysis and Q&A"
+            },
+            {
+                front: "What is the difference between GPT and ChatGPT?",
+                back: "GPT focuses on diverse text generation, while ChatGPT specializes in conversations using RLHF (Reinforcement Learning from Human Feedback)"
+            },
+            {
+                front: "What is a Transformer?",
+                back: "Latest NLP architecture designed for sequential data with superior ability to understand context and dependencies"
+            },
+            {
+                front: "Name 3 key applications of Generative AI",
+                back: "1. Machine translation\n2. Chatbots/virtual assistants\n3. Sentiment analysis\n4. Text summarization"
+            },
+            {
+                front: "What are important considerations when using LLMs?",
+                back: "1. Accuracy concerns (verify info)\n2. Bias issues\n3. Societal impact and ethics"
+            },
+            {
+                front: "What is transfer learning in LLMs?",
+                back: "Pretraining models on generic data, then fine-tuning with smaller datasets for specific tasks"
+            },
+            {
+                front: "What architecture does BART use?",
+                back: "Encoder-decoder architecture, combining encoding for understanding and decoding for text generation"
+            }
+        ];
+
+        // Quiz data
+        const quizQuestions = [
+            {
+                question: "Which of the following represents the correct evolution order of NLP systems?",
+                options: [
+                    "Deep Learning → Rule-based → Machine Learning → Transformers",
+                    "Rule-based → Machine Learning → Deep Learning → Transformers",
+                    "Machine Learning → Rule-based → Transformers → Deep Learning",
+                    "Transformers → Deep Learning → Machine Learning → Rule-based"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is the primary advantage of Transformers over previous architectures?",
+                options: [
+                    "They are smaller and faster",
+                    "They only use rule-based systems",
+                    "Greater ability to understand context and dependencies",
+                    "They don't require any training data"
+                ],
+                correct: 2
+            },
+            {
+                question: "Why are Large Language Models called 'Large'?",
+                options: [
+                    "Only because they have billions of parameters",
+                    "Only because they use petabytes of training data",
+                    "Both petabytes of data AND billions of parameters",
+                    "Because they take up a lot of storage space"
+                ],
+                correct: 2
+            },
+            {
+                question: "What type of architecture does GPT use?",
+                options: [
+                    "Encoder-only",
+                    "Decoder-only",
+                    "Encoder-decoder",
+                    "No specific architecture"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which LLM is best suited for sentiment analysis and question answering?",
+                options: [
+                    "GPT",
+                    "BART",
+                    "BERT",
+                    "T5"
+                ],
+                correct: 2
+            },
+            {
+                question: "What does RLHF stand for in the context of ChatGPT?",
+                options: [
+                    "Rapid Learning from Human Feedback",
+                    "Reinforcement Learning from Human Feedback",
+                    "Rule-based Learning from Historical Files",
+                    "Random Learning from Helpful Feedback"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which of the following is NOT a key application of Generative AI for NLP?",
+                options: [
+                    "Machine translation",
+                    "Sentiment analysis",
+                    "Image generation",
+                    "Text summarization"
+                ],
+                correct: 2
+            },
+            {
+                question: "What is a key limitation of rule-based systems?",
+                options: [
+                    "They are too expensive",
+                    "They lack flexibility",
+                    "They require too much data",
+                    "They are too fast"
+                ],
+                correct: 1
+            },
+            {
+                question: "In transfer learning for LLMs, what happens after pretraining?",
+                options: [
+                    "The model is deleted and rebuilt",
+                    "Fine-tuning with a smaller dataset for specific tasks",
+                    "The model is frozen and never updated",
+                    "Complete retraining from scratch"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is an important consideration when using LLMs?",
+                options: [
+                    "They always produce 100% accurate information",
+                    "They have no biases whatsoever",
+                    "They may generate authoritative-sounding but inaccurate information",
+                    "They never need human oversight"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Create flashcards
+        const flashcardContainer = document.getElementById('flashcardContainer');
+        flashcards.forEach((card, index) => {
+            const flashcard = document.createElement('div');
+            flashcard.className = 'flashcard';
+            flashcard.innerHTML = `
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">${card.front}</div>
+                    <div class="flashcard-back">${card.back}</div>
+                </div>
+            `;
+            flashcard.addEventListener('click', () => {
+                flashcard.classList.toggle('flipped');
+            });
+            flashcardContainer.appendChild(flashcard);
+        });
+
+        // Quiz functionality
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function createQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = '';
+            
+            quizQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'quiz-question' + (index === 0 ? ' active' : '');
+                questionDiv.innerHTML = `
+                    <div class="question-number">Question ${index + 1} of ${quizQuestions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" data-index="${i}">${opt}</div>
+                        `).join('')}
+                    </div>
+                    <div class="quiz-nav">
+                        <button class="btn" onclick="previousQuestion()" ${index === 0 ? 'style="visibility: hidden"' : ''}>Previous</button>
+                        <button class="btn" onclick="nextQuestion()" id="nextBtn${index}">
+                            ${index === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+                        </button>
+                    </div>
+                `;
+                quizContainer.appendChild(questionDiv);
+            });
+
+            // Add click handlers to options
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const questionDiv = this.closest('.quiz-question');
+                    const questionIndex = Array.from(document.querySelectorAll('.quiz-question')).indexOf(questionDiv);
+                    
+                    // Remove previous selection
+                    questionDiv.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect');
+                    });
+                    
+                    // Mark selection
+                    this.classList.add('selected');
+                    selectedAnswer = parseInt(this.dataset.index);
+                    
+                    // Check answer
+                    if (selectedAnswer === quizQuestions[questionIndex].correct) {
+                        this.classList.add('correct');
+                        if (questionIndex === currentQuestion) {
+                            score++;
+                        }
+                    } else {
+                        this.classList.add('incorrect');
+                        questionDiv.querySelectorAll('.option')[quizQuestions[questionIndex].correct].classList.add('correct');
+                    }
+                });
+            });
+        }
+
+        function nextQuestion() {
+            const questions = document.querySelectorAll('.quiz-question');
+            
+            if (currentQuestion < quizQuestions.length - 1) {
+                questions[currentQuestion].classList.remove('active');
+                currentQuestion++;
+                questions[currentQuestion].classList.add('active');
+                selectedAnswer = null;
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            const questions = document.querySelectorAll('.quiz-question');
+            if (currentQuestion > 0) {
+                questions[currentQuestion].classList.remove('active');
+                currentQuestion--;
+                questions[currentQuestion].classList.add('active');
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            const resultsDiv = document.getElementById('quizResults');
+            const percentage = Math.round((score / quizQuestions.length) * 100);
+            
+            document.getElementById('finalScore').textContent = `${score}/${quizQuestions.length}`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🌟 Outstanding! You have mastered Generative AI for NLP!';
+            } else if (percentage >= 70) {
+                message = '✨ Great job! You have a solid understanding of the concepts!';
+            } else if (percentage >= 50) {
+                message = '👍 Good effort! Review the materials and try again!';
+            } else {
+                message = '📚 Keep studying! Review the overview and flashcards!';
+            }
+            
+            document.getElementById('scoreMessage').textContent = message;
+            resultsDiv.classList.add('show');
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            document.getElementById('quizResults').classList.remove('show');
+            document.getElementById('quizContainer').style.display = 'block';
+            createQuiz();
+            updateProgress();
+        }
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Initialize quiz
+        createQuiz();
+        updateProgress();
+    </script>
+</body>
+</html>

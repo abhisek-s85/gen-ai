@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generative AI Architectures — Study Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #13181f;
+    --surface2: #1c2330;
+    --border: #252d3a;
+    --accent: #00e5a0;
+    --accent2: #7c5cff;
+    --accent3: #ff5c8a;
+    --accent4: #ffc740;
+    --accent5: #3dc6ff;
+    --text: #e8edf5;
+    --muted: #6b7990;
+    --correct: #00e5a0;
+    --wrong: #ff5c8a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BG */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,229,160,0.05) 0%, transparent 100%);
+  }
+
+  .header-tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    max-width: 700px;
+  }
+
+  .header-meta {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .badge-green { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+  .badge-purple { background: rgba(124,92,255,0.1); color: var(--accent2); border: 1px solid rgba(124,92,255,0.2); }
+  .badge-pink { background: rgba(255,92,138,0.1); color: var(--accent3); border: 1px solid rgba(255,92,138,0.2); }
+
+  /* NAV TABS */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 0;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    padding: 16px 28px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* SECTIONS */
+  .section { display: none; padding: 40px; position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+  .section.active { display: block; animation: fadeUp 0.4s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── NOTES ─── */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+  }
+  .section-title span { color: var(--accent); }
+
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .model-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .model-card:hover { transform: translateY(-2px); }
+  .model-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .card-rnn::before { background: var(--accent5); }
+  .card-rnn:hover { border-color: var(--accent5); }
+  .card-transformer::before { background: var(--accent2); }
+  .card-transformer:hover { border-color: var(--accent2); }
+  .card-gpt::before { background: var(--accent); }
+  .card-gpt:hover { border-color: var(--accent); }
+  .card-gan::before { background: var(--accent3); }
+  .card-gan:hover { border-color: var(--accent3); }
+  .card-vae::before { background: var(--accent4); }
+  .card-vae:hover { border-color: var(--accent4); }
+  .card-diffusion::before { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
+  .card-diffusion:hover { border-color: var(--accent2); }
+
+  .model-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .rnn-color { color: var(--accent5); }
+  .transformer-color { color: var(--accent2); }
+  .gpt-color { color: var(--accent); }
+  .gan-color { color: var(--accent3); }
+  .vae-color { color: var(--accent4); }
+  .diffusion-color { background: linear-gradient(90deg, var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .model-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .info-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .info-key {
+    color: var(--muted);
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  .info-val { color: var(--text); }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* comparison table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+  .compare-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .rl-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .rl-box h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 12px;
+  }
+  .rl-box p { font-size: 13px; line-height: 1.8; color: var(--text); }
+
+  /* ─── FLASHCARDS ─── */
+  .fc-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .fc-counter {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-left: auto;
+  }
+
+  .fc-scene {
+    perspective: 1000px;
+    width: 100%;
+    max-width: 680px;
+    height: 280px;
+    margin: 0 auto 32px;
+    cursor: pointer;
+  }
+
+  .fc-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .fc-card.flipped { transform: rotateY(180deg); }
+
+  .fc-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+  }
+  .fc-front {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .fc-back {
+    background: linear-gradient(135deg, var(--surface2), var(--surface));
+    border: 1px solid var(--accent);
+    transform: rotateY(180deg);
+  }
+
+  .fc-hint {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .fc-q {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .fc-a {
+    font-size: 15px;
+    color: var(--accent);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .fc-cat {
+    margin-top: 16px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .fc-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #00ffb3; transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+  .fc-progress {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto 16px;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .fc-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* filter buttons */
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: rgba(0,229,160,0.1);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ─── QUIZ ─── */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .quiz-score-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  .score-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .q-card.answered-correct { border-color: var(--correct); }
+  .q-card.answered-wrong { border-color: var(--wrong); }
+
+  .q-num {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+
+  .options { display: grid; gap: 10px; }
+  .opt-btn {
+    padding: 13px 18px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); background: rgba(124,92,255,0.05); }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { border-color: var(--correct); background: rgba(0,229,160,0.08); color: var(--correct); }
+  .opt-btn.wrong { border-color: var(--wrong); background: rgba(255,92,138,0.08); color: var(--wrong); }
+
+  .opt-letter {
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 18px;
+  }
+  .opt-btn.correct .opt-letter { color: var(--correct); }
+  .opt-btn.wrong .opt-letter { color: var(--wrong); }
+
+  .explanation {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(0,229,160,0.05);
+    border-left: 2px solid var(--accent);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+
+  .quiz-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .result-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    margin-top: 32px;
+    display: none;
+  }
+  .result-box.show { display: block; animation: fadeUp 0.4s ease; }
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 72px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .result-label { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag"></div>
+  <h1>Generative AI<br>Architectures & Models</h1>
+  <div class="header-meta">
+    <span class="badge badge-green">5 Model Families</span>
+    <span class="badge badge-purple">20 Flashcards</span>
+    <span class="badge badge-pink">10 Quiz Questions</span>
+  </div>
+</header>
+
+<nav>
+  <button class="tab-btn active" onclick="showTab('notes', this)">📋 Notes</button>
+  <button class="tab-btn" onclick="showTab('flashcards', this)">🃏 Flashcards</button>
+  <button class="tab-btn" onclick="showTab('quiz', this)">🧠 Quiz</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ NOTES -->
+<section id="notes" class="section active">
+
+  <div class="section-title"><span>01</span> Core Model Families</div>
+
+  <div class="model-grid">
+
+    <!-- RNN -->
+    <div class="model-card card-rnn">
+      <div class="model-label rnn-color">Model 01</div>
+      <div class="model-name">RNN</div>
+      <div class="info-row"><span class="info-key">Full name</span><span class="info-val">Recurrent Neural Networks</span></div>
+      <div class="info-row"><span class="info-key">Mechanism</span><span class="info-val">Loop-based design — carries hidden state forward through time</span></div>
+      <div class="info-row"><span class="info-key">Best for</span><span class="info-val">Sequential / time-series data with order and time-based dependencies</span></div>
+      <div class="info-row"><span class="info-key">Fine-tuning</span><span class="info-val">May require adjusting weights <em>and</em> sometimes the model structure</span></div>
+      <div class="tag-list">
+        <span class="tag">Language modeling</span>
+        <span class="tag">Translation</span>
+        <span class="tag">Speech recognition</span>
+        <span class="tag">Image captioning</span>
+      </div>
+    </div>
+
+    <!-- Transformer -->
+    <div class="model-card card-transformer">
+      <div class="model-label transformer-color">Model 02</div>
+      <div class="model-name">Transformer</div>
+      <div class="info-row"><span class="info-key">Full name</span><span class="info-val">Transformer (encoder–decoder / decoder-only)</span></div>
+      <div class="info-row"><span class="info-key">Mechanism</span><span class="info-val">Self-attention focuses on the most important parts of the input, processed in parallel</span></div>
+      <div class="info-row"><span class="info-key">Best for</span><span class="info-val">Fast, scalable sequence modeling — especially NLP</span></div>
+      <div class="info-row"><span class="info-key">Fine-tuning</span><span class="info-val">Keep most layers intact; train mostly the final output layers</span></div>
+      <div class="tag-list">
+        <span class="tag">NLP</span>
+        <span class="tag">Parallelization</span>
+        <span class="tag">Scalable</span>
+      </div>
+    </div>
+
+    <!-- GPT -->
+    <div class="model-card card-gpt">
+      <div class="model-label gpt-color">Model 03</div>
+      <div class="model-name">GPT</div>
+      <div class="info-row"><span class="info-key">Full name</span><span class="info-val">Generative Pre-trained Transformer</span></div>
+      <div class="info-row"><span class="info-key">Mechanism</span><span class="info-val">Transformer-based; predicts and generates text sequences from learned patterns in training data</span></div>
+      <div class="info-row"><span class="info-key">Key point</span><span class="info-val">Doesn't explicitly model data distribution, but mirrors it through versatile fine-tuning</span></div>
+      <div class="info-row"><span class="info-key">Best for</span><span class="info-val">Text generation, question-answering, coding, summarization</span></div>
+      <div class="tag-list">
+        <span class="tag">Text generation</span>
+        <span class="tag">Generative model</span>
+        <span class="tag">Fine-tunable</span>
+      </div>
+    </div>
+
+    <!-- GAN -->
+    <div class="model-card card-gan">
+      <div class="model-label gan-color">Model 04</div>
+      <div class="model-name">GAN</div>
+      <div class="info-row"><span class="info-key">Full name</span><span class="info-val">Generative Adversarial Network</span></div>
+      <div class="info-row"><span class="info-key">Mechanism</span><span class="info-val">Generator creates fake samples → Discriminator scores authenticity → both improve via adversarial competition</span></div>
+      <div class="info-row"><span class="info-key">Best for</span><span class="info-val">Image and video generation (classic use case)</span></div>
+      <div class="info-row"><span class="info-key">Training</span><span class="info-val">Competitive adversarial loop</span></div>
+      <div class="tag-list">
+        <span class="tag">Image generation</span>
+        <span class="tag">Video generation</span>
+        <span class="tag">Adversarial</span>
+      </div>
+    </div>
+
+    <!-- VAE -->
+    <div class="model-card card-vae">
+      <div class="model-label vae-color">Model 05</div>
+      <div class="model-name">VAE</div>
+      <div class="info-row"><span class="info-key">Full name</span><span class="info-val">Variational Autoencoder</span></div>
+      <div class="info-row"><span class="info-key">Architecture</span><span class="info-val">Encoder compresses input → probabilistic latent space → Decoder reconstructs output</span></div>
+      <div class="info-row"><span class="info-key">Key property</span><span class="info-val">Latent space is <em>probabilistic</em> → many plausible outputs (models uncertainty)</span></div>
+      <div class="info-row"><span class="info-key">Best for</span><span class="info-val">Art / creative design; generating novel variations</span></div>
+      <div class="tag-list">
+        <span class="tag">Creative design</span>
+        <span class="tag">Encoder-decoder</span>
+        <span class="tag">Probabilistic</span>
+      </div>
+    </div>
+
+    <!-- Diffusion -->
+    <div class="model-card card-diffusion">
+      <div class="model-label diffusion-color">Model 06</div>
+      <div class="model-name">Diffusion</div>
+      <div class="info-row"><span class="info-key">Type</span><span class="info-val">Probabilistic generative model</span></div>
+      <div class="info-row"><span class="info-key">Core idea</span><span class="info-val">Learns to remove noise / reconstruct heavily distorted data iteratively</span></div>
+      <div class="info-row"><span class="info-key">Strength</span><span class="info-val">Can generate very high-quality images via iterative denoising</span></div>
+      <div class="info-row"><span class="info-key">Example use</span><span class="info-val">Restoring noisy/low-quality images (e.g., old distorted photos)</span></div>
+      <div class="tag-list">
+        <span class="tag">High-quality images</span>
+        <span class="tag">Denoising</span>
+        <span class="tag">Statistical</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Comparison table ── -->
+  <div class="section-title"><span>02</span> Training Approaches — Quick Comparison</div>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Training Loop</th>
+        <th>Key Mechanism</th>
+        <th>Fine-tuning Approach</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:var(--accent5); font-weight:600;">RNNs</td>
+        <td>Loop-based sequential memory</td>
+        <td>Hidden state carried forward</td>
+        <td>Adjust weights + sometimes structure</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent2); font-weight:600;">Transformers</td>
+        <td>Self-attention + parallel training</td>
+        <td>Multi-head self-attention</td>
+        <td>Freeze early layers; retrain output layers</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent); font-weight:600;">GANs</td>
+        <td>Competitive adversarial training</td>
+        <td>Generator vs Discriminator</td>
+        <td>Fine-tune both sub-networks</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent4); font-weight:600;">VAEs</td>
+        <td>Characteristics-based (ELBO loss)</td>
+        <td>Probabilistic latent variables</td>
+        <td>Adjust encoder / decoder weights</td>
+      </tr>
+      <tr>
+        <td style="color:var(--accent3); font-weight:600;">Diffusion</td>
+        <td>Statistical denoising process</td>
+        <td>Learn noise distribution</td>
+        <td>Fine-tune on target domain images</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── RL section ── -->
+  <div class="section-title"><span>03</span> Generative AI + Reinforcement Learning</div>
+
+  <div class="rl-box">
+    <h3>How RL Connects to Generative Models</h3>
+    <p>
+      <strong style="color:var(--text);">Reinforcement Learning (RL)</strong> trains agents to maximize a reward signal by learning which behaviors lead to better outcomes.<br><br>
+      Generative AI models can leverage RL-style techniques during training to fine-tune their outputs toward <strong style="color:var(--accent);">preferred, human-aligned behaviors</strong> — this is the core idea behind <strong style="color:var(--accent2);">RLHF (Reinforcement Learning from Human Feedback)</strong> workflows used to align models like GPT.<br><br>
+      <strong style="color:var(--accent4);">Key point:</strong> RL does <em>not</em> replace pre-training. It is applied <em>after</em> pre-training to steer the model toward desirable outputs via reward feedback.
+    </p>
+  </div>
+
+  <div class="rl-box" style="border-left-color: var(--accent3);">
+    <h3 style="color:var(--accent3);">Scenario: Text → Personalized Video Clips</h3>
+    <p>
+      From the lesson's model set: <strong style="color:var(--accent3);">GANs</strong> are explicitly cited for image/video generation.<br>
+      In modern systems, <strong style="color:var(--accent2);">Diffusion models</strong> are also heavily used for text-conditioned visual generation and are increasingly extended to video synthesis.
+    </p>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ FLASHCARDS -->
+<section id="flashcards" class="section">
+
+  <div class="section-title"><span>02</span> Flashcards</div>
+
+  <div class="filter-row" id="filterRow">
+    <button class="filter-btn active" onclick="filterCards('all', this)">All (20)</button>
+    <button class="filter-btn" onclick="filterCards('RNN', this)">RNN</button>
+    <button class="filter-btn" onclick="filterCards('Transformer', this)">Transformer</button>
+    <button class="filter-btn" onclick="filterCards('GAN', this)">GAN</button>
+    <button class="filter-btn" onclick="filterCards('VAE', this)">VAE</button>
+    <button class="filter-btn" onclick="filterCards('Diffusion', this)">Diffusion</button>
+    <button class="filter-btn" onclick="filterCards('RL', this)">RL</button>
+    <button class="filter-btn" onclick="filterCards('General', this)">General</button>
+  </div>
+
+  <div class="fc-controls">
+    <button class="btn btn-secondary" onclick="prevCard()">← Prev</button>
+    <button class="btn btn-secondary" onclick="nextCard()">Next →</button>
+    <button class="btn btn-ghost" onclick="shuffleCards()">⇄ Shuffle</button>
+    <div class="fc-counter"><span id="fcIdx">1</span> / <span id="fcTotal">20</span></div>
+  </div>
+
+  <div class="fc-progress"><div class="fc-progress-bar" id="fcBar"></div></div>
+
+  <div class="fc-scene" onclick="flipCard()">
+    <div class="fc-card" id="fcCard">
+      <div class="fc-face fc-front">
+        <div class="fc-hint">Click to reveal answer</div>
+        <div class="fc-q" id="fcQ"></div>
+        <div class="fc-cat" id="fcCatFront"></div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-hint">Answer</div>
+        <div class="fc-a" id="fcA"></div>
+        <div class="fc-cat" id="fcCatBack"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc-nav">
+    <button class="btn btn-ghost" onclick="prevCard()">← Previous</button>
+    <button class="btn btn-primary" onclick="nextCard()">Next Card →</button>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ QUIZ -->
+<section id="quiz" class="section">
+
+  <div class="quiz-header">
+    <div class="section-title" style="margin-bottom:0"><span>03</span> Quiz — 10 Questions</div>
+    <div class="quiz-score-bar">
+      Score: <span class="score-val" id="scoreVal">0</span> / <span id="scoreTot">10</span>
+    </div>
+  </div>
+
+  <div id="quizContainer"></div>
+
+  <div class="quiz-footer">
+    <button class="btn btn-ghost" onclick="resetQuiz()">↺ Reset</button>
+    <button class="btn btn-primary" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top:8px;">Try Again</button>
+  </div>
+
+</section>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────
+
+const allCards = [
+  { q: "What type of data are RNNs best suited for?", a: "Sequential / time-series data — anything with natural order and time-based dependencies (e.g., language, speech).", cat: "RNN" },
+  { q: "What makes RNNs unique compared to feedforward networks?", a: "Their loop-based structure carries a hidden state forward, allowing them to 'remember' prior inputs to influence the current output.", cat: "RNN" },
+  { q: "Name four common applications of RNNs.", a: "Language modeling, language translation, speech recognition, and image captioning.", cat: "RNN" },
+  { q: "How is fine-tuning typically done for RNNs?", a: "It may require adjusting the model's weights and sometimes even the model's structure (unlike Transformers where structure is usually kept intact).", cat: "RNN" },
+
+  { q: "What is the key mechanism that makes Transformers efficient?", a: "Self-attention — it allows the model to focus on the most important parts of the input and process multiple input segments concurrently (parallelization).", cat: "Transformer" },
+  { q: "Why can Transformers train faster than RNNs?", a: "They support parallelization: instead of sequential loop steps, they process all input positions simultaneously via self-attention.", cat: "Transformer" },
+  { q: "What is the fine-tuning strategy for Transformers?", a: "Keep most layers (earlier layers) frozen and intact; train mostly the final output layers for the target task.", cat: "Transformer" },
+  { q: "What does GPT stand for and what architecture does it use?", a: "Generative Pre-trained Transformer. It uses the Transformer architecture, specifically as a decoder-only generative model.", cat: "Transformer" },
+  { q: "How does GPT generate text?", a: "It predicts and generates text sequences based on patterns learned from its training data. It mirrors the training data distribution without explicitly modeling it.", cat: "Transformer" },
+
+  { q: "What are the two components of a GAN?", a: "A Generator (creates fake/synthetic samples) and a Discriminator (scores authenticity by comparing to real samples).", cat: "GAN" },
+  { q: "Describe the GAN training loop.", a: "1. Generator creates fake samples. 2. Discriminator compares them to real data and outputs a 'realness' score. 3. Both networks improve through this adversarial competition until the Generator fools the Discriminator.", cat: "GAN" },
+  { q: "What is the classic use case for GANs?", a: "Image and video generation.", cat: "GAN" },
+
+  { q: "What is the architecture of a VAE?", a: "Encoder–Decoder: the Encoder compresses input into a probabilistic latent space; the Decoder reconstructs output from a sampled latent vector.", cat: "VAE" },
+  { q: "What makes the VAE's latent space 'probabilistic'?", a: "Instead of encoding input to a single point, the VAE encodes it as a distribution (mean + variance). Sampling from this distribution yields many plausible outputs, capturing uncertainty.", cat: "VAE" },
+  { q: "What is VAE best used for?", a: "Art and creative design; generating novel variations of input data (e.g., style transfer, creative image synthesis).", cat: "VAE" },
+
+  { q: "What is the core idea behind Diffusion models?", a: "They learn to reverse a noise-adding process: given heavily noised/distorted data, they iteratively remove noise to reconstruct high-quality samples.", cat: "Diffusion" },
+  { q: "Give a real-world application of Diffusion models.", a: "Restoring noisy or low-quality images, such as old distorted photographs. Also used for high-quality text-conditioned image and video generation.", cat: "Diffusion" },
+
+  { q: "How does Reinforcement Learning relate to generative AI?", a: "RL-style techniques can be applied after pre-training to fine-tune generative model behavior toward preferred outputs — the core of RLHF (Reinforcement Learning from Human Feedback).", cat: "RL" },
+  { q: "Does RL replace pre-training in generative AI?", a: "No. RL is applied after pre-training to steer the model toward desirable outputs via reward signals. Pre-training remains essential.", cat: "RL" },
+
+  { q: "Define fine-tuning in the context of generative AI.", a: "Fine-tuning = adjusting a pre-trained model to improve its performance for a specific task or dataset, without training from scratch.", cat: "General" },
+];
+
+let deck = [...allCards];
+let currentIdx = 0;
+let isFlipped = false;
+
+function filterCards(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  deck = cat === 'all' ? [...allCards] : allCards.filter(c => c.cat === cat);
+  currentIdx = 0;
+  updateCard();
+}
+
+function updateCard() {
+  const card = deck[currentIdx];
+  document.getElementById('fcQ').textContent = card.q;
+  document.getElementById('fcA').textContent = card.a;
+  document.getElementById('fcCatFront').textContent = card.cat;
+  document.getElementById('fcCatBack').textContent = card.cat;
+  document.getElementById('fcIdx').textContent = currentIdx + 1;
+  document.getElementById('fcTotal').textContent = deck.length;
+  const pct = ((currentIdx + 1) / deck.length) * 100;
+  document.getElementById('fcBar').style.width = pct + '%';
+  // reset flip
+  isFlipped = false;
+  document.getElementById('fcCard').classList.remove('flipped');
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('fcCard').classList.toggle('flipped', isFlipped);
+}
+function nextCard() {
+  currentIdx = (currentIdx + 1) % deck.length;
+  updateCard();
+}
+function prevCard() {
+  currentIdx = (currentIdx - 1 + deck.length) % deck.length;
+  updateCard();
+}
+function shuffleCards() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  currentIdx = 0;
+  updateCard();
+}
+
+// ─── QUIZ ──────────────────────────────────────────────────────────────
+
+const quizData = [
+  {
+    q: "Which model uses loops to carry information forward through time?",
+    opts: ["VAE", "RNN", "GAN", "Diffusion"],
+    answer: 1,
+    exp: "RNNs use a loop-based design where the hidden state from the previous step is passed into the next step, allowing them to 'remember' prior inputs."
+  },
+  {
+    q: "What mechanism helps Transformers focus on the most important parts of the input?",
+    opts: ["Convolution", "Self-attention", "Pooling", "Dropout"],
+    answer: 1,
+    exp: "Self-attention allows the Transformer to dynamically weigh the importance of every input position relative to every other position."
+  },
+  {
+    q: "A GAN consists of two sub-models called:",
+    opts: ["Encoder / Decoder", "Actor / Critic", "Generator / Discriminator", "Policy / Reward"],
+    answer: 2,
+    exp: "The Generator creates synthetic samples; the Discriminator evaluates whether a sample is real or fake. They train together adversarially."
+  },
+  {
+    q: "Which model uses an encoder–decoder architecture with a probabilistic latent space?",
+    opts: ["VAE", "RNN", "Transformer", "GAN"],
+    answer: 0,
+    exp: "VAEs encode inputs into a distribution (not a single point) in latent space, enabling the generation of many plausible diverse outputs."
+  },
+  {
+    q: "Diffusion models generate outputs by:",
+    opts: ["Sampling a latent code once", "Denoising step-by-step from noise", "Competing two networks", "Looping hidden states"],
+    answer: 1,
+    exp: "Diffusion models learn to reverse a noise process, iteratively removing noise from a distorted input until a high-quality sample emerges."
+  },
+  {
+    q: "Fine-tuning a model means:",
+    opts: ["Training from scratch on new data", "Adjusting a pre-trained model for a specific task", "Turning off attention layers", "Only changing the dataset format"],
+    answer: 1,
+    exp: "Fine-tuning starts from a pre-trained model and adjusts weights (and sometimes structure) to specialize it for a new task or dataset — far more efficient than training from scratch."
+  },
+  {
+    q: "Which model family is best matched for time-series / sequential dependencies?",
+    opts: ["RNN", "GAN", "VAE", "Diffusion"],
+    answer: 0,
+    exp: "RNNs are explicitly designed for sequential data, processing inputs in order and maintaining a hidden state to capture temporal dependencies."
+  },
+  {
+    q: "Transformer training is efficient primarily because it supports:",
+    opts: ["Recurrence", "Parallelization", "Manual feature engineering", "Single-step decoding only"],
+    answer: 1,
+    exp: "By processing all input positions simultaneously via self-attention, Transformers can leverage GPU parallelism — unlike RNNs which process tokens sequentially."
+  },
+  {
+    q: "In a GAN, the Discriminator outputs:",
+    opts: ["A latent distribution", "A probability score of 'realness'", "The next token in a sequence", "A denoised image directly"],
+    answer: 1,
+    exp: "The Discriminator classifies whether a given sample is real (from training data) or fake (from the Generator), outputting a probability score."
+  },
+  {
+    q: "How can Reinforcement Learning (RL) relate to generative AI models?",
+    opts: ["It replaces pre-training completely", "It is used to fine-tune behavior toward a reward or objective", "It only applies to robotics", "It only applies to VAEs"],
+    answer: 1,
+    exp: "RL techniques (e.g., RLHF) are applied after pre-training to align generative models with human preferences by treating desired output quality as a reward signal."
+  }
+];
+
+let score = 0;
+let answered = new Array(quizData.length).fill(false);
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  quizData.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard${i}`;
+    const letters = ['A', 'B', 'C', 'D'];
+    card.innerHTML = `
+      <div class="q-num">Question ${i + 1} of ${quizData.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts${i}">
+        ${item.opts.map((o, j) => `
+          <button class="opt-btn" id="opt${i}_${j}" onclick="selectAnswer(${i}, ${j})">
+            <span class="opt-letter">${letters[j]}</span>
+            <span>${o}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="explanation" id="exp${i}">${item.exp}</div>
+    `;
+    container.appendChild(card);
+  });
+  score = 0;
+  answered.fill(false);
+  document.getElementById('scoreVal').textContent = '0';
+  document.getElementById('resultBox').classList.remove('show');
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (answered[qIdx]) return;
+  answered[qIdx] = true;
+  const correct = quizData[qIdx].answer;
+  const card = document.getElementById(`qcard${qIdx}`);
+  const opts = document.querySelectorAll(`#opts${qIdx} .opt-btn`);
+  opts.forEach(btn => btn.disabled = true);
+  opts[optIdx].classList.add(optIdx === correct ? 'correct' : 'wrong');
+  if (optIdx !== correct) opts[correct].classList.add('correct');
+  card.classList.add(optIdx === correct ? 'answered-correct' : 'answered-wrong');
+  document.getElementById(`exp${qIdx}`).classList.add('show');
+  if (optIdx === correct) {
+    score++;
+    document.getElementById('scoreVal').textContent = score;
+  }
+}
+
+function submitQuiz() {
+  const total = quizData.length;
+  const pct = Math.round((score / total) * 100);
+  let label = pct === 100 ? '🎉 Perfect score!' : pct >= 70 ? '✅ Well done!' : pct >= 50 ? '📚 Keep studying!' : '🔄 Review the notes and try again.';
+  document.getElementById('resultScore').textContent = `${score} / ${total}`;
+  document.getElementById('resultLabel').textContent = `${pct}% — ${label}`;
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────
+updateCard();
+buildQuiz();
+</script>
+</body>
+</html>
